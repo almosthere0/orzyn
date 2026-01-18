@@ -4,6 +4,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   MessageSquare, 
   Trophy, 
@@ -12,12 +13,19 @@ import {
   LogOut, 
   Settings, 
   Sparkles,
-  ChevronRight,
   Star,
-  TrendingUp
+  TrendingUp,
+  GraduationCap
 } from "lucide-react";
+import { GroupChatPanel } from "@/components/chat/GroupChatPanel";
+import { ChallengeBoard } from "@/components/challenges/ChallengeBoard";
+import { TeacherRatings } from "@/components/ratings/TeacherRatings";
+import { PostCard } from "@/components/posts/PostCard";
+import { CreatePostForm } from "@/components/posts/CreatePostForm";
+import { usePosts } from "@/hooks/usePosts";
 
 interface Profile {
+  id: string;
   username: string | null;
   school_id: string | null;
   grade_level: string | null;
@@ -33,6 +41,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [school, setSchool] = useState<School | null>(null);
+  const { posts, vote, createPost } = usePosts(profile?.school_id || undefined);
 
   useEffect(() => {
     if (!loading && !user && !isGuest) {
@@ -46,7 +55,7 @@ const Dashboard = () => {
 
       const { data: profileData } = await supabase
         .from("profiles")
-        .select("username, school_id, grade_level, reputation_points")
+        .select("id, username, school_id, grade_level, reputation_points")
         .eq("user_id", user.id)
         .maybeSingle();
 
@@ -170,137 +179,61 @@ const Dashboard = () => {
           ))}
         </motion.div>
 
-        {/* Main Content Grid */}
-        <div className="grid lg:grid-cols-3 gap-6">
-          {/* My Class Chat */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="lg:col-span-2 bg-card rounded-xl border border-border shadow-card overflow-hidden"
-          >
-            <div className="p-4 border-b border-border flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg gradient-primary">
-                  <MessageSquare className="w-5 h-5 text-primary-foreground" />
-                </div>
-                <div>
-                  <h2 className="font-display font-semibold">My Class Chat</h2>
-                  <p className="text-sm text-muted-foreground">{profile?.grade_level || "Your Class"}</p>
-                </div>
-              </div>
-              <Button variant="ghost" size="sm">
-                Open <ChevronRight className="w-4 h-4 ml-1" />
-              </Button>
-            </div>
-            <div className="p-4 space-y-3">
-              {[
-                { user: "Alex M.", message: "Anyone got the notes from today?", time: "2m ago" },
-                { user: "Sarah K.", message: "Yeah I'll share them in a sec", time: "1m ago" },
-                { user: "Jordan T.", message: "Thanks! Also did you guys see the challenge announcement?", time: "Just now" },
-              ].map((msg, index) => (
-                <div key={index} className="flex gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
-                  <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-sm font-medium">
-                    {msg.user.charAt(0)}
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium text-sm">{msg.user}</span>
-                      <span className="text-xs text-muted-foreground">{msg.time}</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground">{msg.message}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </motion.div>
+        {/* Tabs for different sections */}
+        <Tabs defaultValue="feed" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-grid">
+            <TabsTrigger value="feed" className="gap-2">
+              <Flame className="w-4 h-4" />
+              <span className="hidden sm:inline">Feed</span>
+            </TabsTrigger>
+            <TabsTrigger value="chat" className="gap-2">
+              <MessageSquare className="w-4 h-4" />
+              <span className="hidden sm:inline">Chat</span>
+            </TabsTrigger>
+            <TabsTrigger value="challenges" className="gap-2">
+              <Trophy className="w-4 h-4" />
+              <span className="hidden sm:inline">Challenges</span>
+            </TabsTrigger>
+            <TabsTrigger value="ratings" className="gap-2">
+              <GraduationCap className="w-4 h-4" />
+              <span className="hidden sm:inline">Ratings</span>
+            </TabsTrigger>
+          </TabsList>
 
-          {/* School Challenges */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="bg-card rounded-xl border border-border shadow-card overflow-hidden"
-          >
-            <div className="p-4 border-b border-border flex items-center gap-3">
-              <div className="p-2 rounded-lg gradient-accent">
-                <Trophy className="w-5 h-5 text-accent-foreground" />
+          <TabsContent value="feed" className="space-y-4">
+            <CreatePostForm onSubmit={createPost} />
+            {posts.length === 0 ? (
+              <div className="bg-card rounded-xl border border-border p-8 text-center">
+                <Flame className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="font-display font-semibold mb-2">No posts yet</h3>
+                <p className="text-muted-foreground text-sm">
+                  Be the first to post something in your school!
+                </p>
               </div>
-              <div>
-                <h2 className="font-display font-semibold">School Challenges</h2>
-                <p className="text-sm text-muted-foreground">Active now</p>
-              </div>
-            </div>
-            <div className="p-4 space-y-4">
-              <div className="rounded-lg bg-muted/50 p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm font-medium">🏫 Your School</span>
-                  <span className="text-lg font-bold text-primary">2,450</span>
-                </div>
-                <div className="w-full bg-muted rounded-full h-2 mb-3">
-                  <div className="bg-primary h-2 rounded-full" style={{ width: "65%" }} />
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">🎯 Rival School</span>
-                  <span className="text-lg font-bold text-accent">1,890</span>
-                </div>
-                <div className="w-full bg-muted rounded-full h-2 mt-3">
-                  <div className="bg-accent h-2 rounded-full" style={{ width: "50%" }} />
-                </div>
-              </div>
-              <Button variant="outline" className="w-full">
-                View All Challenges
+            ) : (
+              posts.slice(0, 5).map((post, index) => (
+                <PostCard key={post.id} post={post} onVote={vote} index={index} />
+              ))
+            )}
+            {posts.length > 5 && (
+              <Button variant="outline" className="w-full" onClick={() => navigate("/feed")}>
+                View All Posts
               </Button>
-            </div>
-          </motion.div>
+            )}
+          </TabsContent>
 
-          {/* Hot Posts */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-            className="lg:col-span-3 bg-card rounded-xl border border-border shadow-card overflow-hidden"
-          >
-            <div className="p-4 border-b border-border flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-orange-500/20">
-                  <Flame className="w-5 h-5 text-orange-500" />
-                </div>
-                <div>
-                  <h2 className="font-display font-semibold">Hot Posts</h2>
-                  <p className="text-sm text-muted-foreground">Trending in your school</p>
-                </div>
-              </div>
-              <Button variant="ghost" size="sm" onClick={() => navigate("/feed")}>
-                View All <ChevronRight className="w-4 h-4 ml-1" />
-              </Button>
-            </div>
-            <div className="divide-y divide-border">
-              {[
-                { title: "Final exam study group forming!", votes: 42, comments: 18, tag: "Study" },
-                { title: "Basketball team made it to finals! 🏀", votes: 156, comments: 34, tag: "Sports" },
-                { title: "New cafeteria menu review", votes: 23, comments: 45, tag: "Campus Life" },
-              ].map((post, index) => (
-                <div key={index} className="p-4 hover:bg-muted/30 transition-colors cursor-pointer">
-                  <div className="flex items-start gap-4">
-                    <div className="flex flex-col items-center gap-1 text-muted-foreground">
-                      <button className="hover:text-primary">▲</button>
-                      <span className="text-sm font-medium">{post.votes}</span>
-                      <button className="hover:text-destructive">▼</button>
-                    </div>
-                    <div className="flex-1">
-                      <span className="inline-block px-2 py-0.5 rounded text-xs bg-primary/20 text-primary mb-2">
-                        {post.tag}
-                      </span>
-                      <h3 className="font-medium mb-1">{post.title}</h3>
-                      <p className="text-sm text-muted-foreground">{post.comments} comments</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-        </div>
+          <TabsContent value="chat">
+            <GroupChatPanel />
+          </TabsContent>
+
+          <TabsContent value="challenges">
+            <ChallengeBoard schoolId={profile?.school_id || undefined} />
+          </TabsContent>
+
+          <TabsContent value="ratings">
+            <TeacherRatings schoolId={profile?.school_id || undefined} />
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );

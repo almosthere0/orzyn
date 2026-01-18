@@ -10,81 +10,31 @@ import {
   Flame, 
   Clock, 
   TrendingUp,
-  MessageSquare,
-  Share2,
-  Bookmark,
-  MoreHorizontal,
   LogIn,
   Home
 } from "lucide-react";
+import { PostCard } from "@/components/posts/PostCard";
+import { CreatePostForm } from "@/components/posts/CreatePostForm";
+import { usePosts } from "@/hooks/usePosts";
 
 const Feed = () => {
   const { user, isGuest } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"hot" | "new" | "trending">("hot");
+  const { posts, loading, vote, createPost } = usePosts();
 
-  const posts = [
-    {
-      id: 1,
-      title: "Who else is stressed about finals? Drop your study tips below 📚",
-      content: "I've been pulling all-nighters but nothing seems to stick. What's everyone's secret?",
-      author: "StudyGrind247",
-      school: "Stanford University",
-      votes: 234,
-      comments: 89,
-      tag: "Study Tips",
-      time: "2h ago",
-      isHot: true,
-    },
-    {
-      id: 2,
-      title: "Our team just won the inter-school debate championship! 🏆",
-      content: "So proud of everyone who participated. Next stop: nationals!",
-      author: "DebateKing",
-      school: "Harvard University",
-      votes: 567,
-      comments: 123,
-      tag: "Achievement",
-      time: "4h ago",
-      isHot: true,
-    },
-    {
-      id: 3,
-      title: "Honest review: The new campus coffee shop",
-      content: "Finally tried it out. Here's what I think about the prices, quality, and vibe...",
-      author: "CaffeineAddict",
-      school: "MIT",
-      votes: 145,
-      comments: 56,
-      tag: "Campus Life",
-      time: "6h ago",
-      isHot: false,
-    },
-    {
-      id: 4,
-      title: "Anyone want to start a coding club? 💻",
-      content: "Looking for people interested in hackathons, competitive programming, or just learning together.",
-      author: "CodeNewbie",
-      school: "UCLA",
-      votes: 89,
-      comments: 34,
-      tag: "Clubs",
-      time: "8h ago",
-      isHot: false,
-    },
-    {
-      id: 5,
-      title: "The cafeteria mystery meat strikes again",
-      content: "Day 47 of trying to figure out what they actually serve. Any guesses?",
-      author: "FoodDetective",
-      school: "Yale University",
-      votes: 432,
-      comments: 201,
-      tag: "Memes",
-      time: "1d ago",
-      isHot: true,
-    },
-  ];
+  const sortedPosts = [...posts].sort((a, b) => {
+    if (activeTab === "hot") {
+      return b.votes - a.votes;
+    } else if (activeTab === "new") {
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    } else {
+      // Trending: combination of votes and recency
+      const aScore = a.votes / (Date.now() - new Date(a.created_at).getTime());
+      const bScore = b.votes / (Date.now() - new Date(b.created_at).getTime());
+      return bScore - aScore;
+    }
+  });
 
   return (
     <div className="min-h-screen bg-background">
@@ -154,6 +104,9 @@ const Feed = () => {
         <div className="grid lg:grid-cols-4 gap-6">
           {/* Main Feed */}
           <div className="lg:col-span-3">
+            {/* Create Post */}
+            <CreatePostForm onSubmit={createPost} />
+
             {/* Tabs */}
             <div className="flex items-center gap-2 mb-6">
               {[
@@ -175,89 +128,25 @@ const Feed = () => {
             </div>
 
             {/* Posts */}
-            <div className="space-y-4">
-              {posts.map((post, index) => (
-                <motion.article
-                  key={post.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                  className="bg-card rounded-xl border border-border shadow-card overflow-hidden hover:border-primary/30 transition-colors"
-                >
-                  <div className="p-4">
-                    <div className="flex gap-4">
-                      {/* Votes */}
-                      <div className="flex flex-col items-center gap-1 text-muted-foreground">
-                        <button 
-                          className="hover:text-primary disabled:opacity-50"
-                          disabled={isGuest && !user}
-                          title={isGuest ? "Sign in to vote" : "Upvote"}
-                        >
-                          ▲
-                        </button>
-                        <span className="text-sm font-bold">{post.votes}</span>
-                        <button 
-                          className="hover:text-destructive disabled:opacity-50"
-                          disabled={isGuest && !user}
-                          title={isGuest ? "Sign in to vote" : "Downvote"}
-                        >
-                          ▼
-                        </button>
-                      </div>
-
-                      {/* Content */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-2 flex-wrap">
-                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-primary/20 text-primary">
-                            {post.tag}
-                          </span>
-                          {post.isHot && (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs bg-orange-500/20 text-orange-500">
-                              <Flame className="w-3 h-3" /> Hot
-                            </span>
-                          )}
-                          <span className="text-xs text-muted-foreground">
-                            {post.school}
-                          </span>
-                        </div>
-
-                        <h2 className="font-display font-semibold text-lg mb-2 cursor-pointer hover:text-primary transition-colors">
-                          {post.title}
-                        </h2>
-                        <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
-                          {post.content}
-                        </p>
-
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                          <span>by {post.author}</span>
-                          <span>•</span>
-                          <span>{post.time}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex items-center gap-2 mt-4 pt-4 border-t border-border">
-                      <Button variant="ghost" size="sm" className="gap-2">
-                        <MessageSquare className="w-4 h-4" />
-                        {post.comments} Comments
-                      </Button>
-                      <Button variant="ghost" size="sm" className="gap-2">
-                        <Share2 className="w-4 h-4" />
-                        Share
-                      </Button>
-                      <Button variant="ghost" size="sm" className="gap-2">
-                        <Bookmark className="w-4 h-4" />
-                        Save
-                      </Button>
-                      <Button variant="ghost" size="icon" className="ml-auto">
-                        <MoreHorizontal className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </motion.article>
-              ))}
-            </div>
+            {loading ? (
+              <div className="bg-card rounded-xl border border-border p-8 text-center">
+                <div className="animate-pulse text-primary">Loading posts...</div>
+              </div>
+            ) : sortedPosts.length === 0 ? (
+              <div className="bg-card rounded-xl border border-border p-8 text-center">
+                <Flame className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="font-display font-semibold mb-2">No posts yet</h3>
+                <p className="text-muted-foreground text-sm">
+                  Be the first to share something with the community!
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {sortedPosts.map((post, index) => (
+                  <PostCard key={post.id} post={post} onVote={vote} index={index} />
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Sidebar */}
