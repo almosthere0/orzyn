@@ -1,8 +1,18 @@
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 import { ArrowRight, Sparkles, Users, Zap, Trophy } from "lucide-react";
 
 const Hero = () => {
+  const navigate = useNavigate();
+  const { setIsGuest } = useAuth();
+
+  const handleSkip = () => {
+    setIsGuest(true);
+    navigate("/feed");
+  };
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden gradient-hero">
       {/* Animated background elements */}
@@ -89,15 +99,30 @@ const Hero = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.7, duration: 0.8 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16"
+            className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6"
           >
-            <Button variant="hero" size="xl">
+            <Button variant="hero" size="xl" onClick={() => navigate("/auth")}>
               Get Started Free
               <ArrowRight className="w-5 h-5" />
             </Button>
-            <Button variant="glass" size="xl">
+            <Button variant="glass" size="xl" onClick={() => navigate("/feed")}>
               Explore Schools
             </Button>
+          </motion.div>
+
+          {/* Skip Button */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.9, duration: 0.5 }}
+            className="mb-16"
+          >
+            <button
+              onClick={handleSkip}
+              className="text-white/50 hover:text-white/80 text-sm underline underline-offset-4 transition-colors"
+            >
+              Skip and browse as guest
+            </button>
           </motion.div>
 
           {/* Stats */}

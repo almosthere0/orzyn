@@ -1,9 +1,13 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Sparkles } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { Menu, X, Sparkles, LogOut } from "lucide-react";
 
 const Navbar = () => {
+  const navigate = useNavigate();
+  const { user, signOut } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -36,14 +40,14 @@ const Navbar = () => {
       <div className="container">
         <div className="flex items-center justify-between h-16 lg:h-20">
           {/* Logo */}
-          <a href="/" className="flex items-center gap-2">
+          <Link to="/" className="flex items-center gap-2">
             <div className="w-9 h-9 rounded-xl gradient-primary flex items-center justify-center shadow-glow">
               <Sparkles className="w-5 h-5 text-primary-foreground" />
             </div>
             <span className={`font-display font-bold text-xl ${isScrolled ? "text-foreground" : "text-white"}`}>
               CampusConnect
             </span>
-          </a>
+          </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center gap-8">
@@ -62,15 +66,38 @@ const Navbar = () => {
 
           {/* Desktop CTA */}
           <div className="hidden lg:flex items-center gap-3">
-            <Button 
-              variant={isScrolled ? "ghost" : "glass"} 
-              size="sm"
-            >
-              Sign In
-            </Button>
-            <Button variant="hero" size="sm">
-              Get Started
-            </Button>
+            {user ? (
+              <>
+                <Button 
+                  variant={isScrolled ? "outline" : "glass"} 
+                  size="sm"
+                  onClick={() => navigate("/dashboard")}
+                >
+                  Dashboard
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => signOut()}
+                  className={isScrolled ? "" : "text-white/70 hover:text-white hover:bg-white/10"}
+                >
+                  <LogOut className="w-4 h-4" />
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button 
+                  variant={isScrolled ? "ghost" : "glass"} 
+                  size="sm"
+                  onClick={() => navigate("/auth")}
+                >
+                  Sign In
+                </Button>
+                <Button variant="hero" size="sm" onClick={() => navigate("/auth")}>
+                  Get Started
+                </Button>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -102,12 +129,25 @@ const Navbar = () => {
                 </a>
               ))}
               <div className="flex flex-col gap-2 px-4 pt-4 border-t border-border mt-2">
-                <Button variant="outline" className="w-full">
-                  Sign In
-                </Button>
-                <Button variant="hero" className="w-full">
-                  Get Started
-                </Button>
+                {user ? (
+                  <>
+                    <Button variant="hero" className="w-full" onClick={() => { navigate("/dashboard"); setIsMobileMenuOpen(false); }}>
+                      Dashboard
+                    </Button>
+                    <Button variant="outline" className="w-full" onClick={() => { signOut(); setIsMobileMenuOpen(false); }}>
+                      Sign Out
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button variant="outline" className="w-full" onClick={() => { navigate("/auth"); setIsMobileMenuOpen(false); }}>
+                      Sign In
+                    </Button>
+                    <Button variant="hero" className="w-full" onClick={() => { navigate("/auth"); setIsMobileMenuOpen(false); }}>
+                      Get Started
+                    </Button>
+                  </>
+                )}
               </div>
             </div>
           </motion.div>
