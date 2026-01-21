@@ -49,22 +49,34 @@ export type Database = {
           author_id: string
           content: string
           created_at: string
+          downvotes: number | null
           id: string
+          is_anonymous: boolean | null
+          parent_id: string | null
           post_id: string
+          upvotes: number | null
         }
         Insert: {
           author_id: string
           content: string
           created_at?: string
+          downvotes?: number | null
           id?: string
+          is_anonymous?: boolean | null
+          parent_id?: string | null
           post_id: string
+          upvotes?: number | null
         }
         Update: {
           author_id?: string
           content?: string
           created_at?: string
+          downvotes?: number | null
           id?: string
+          is_anonymous?: boolean | null
+          parent_id?: string | null
           post_id?: string
+          upvotes?: number | null
         }
         Relationships: [
           {
@@ -75,10 +87,245 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "comments_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "comments"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "comments_post_id_fkey"
             columns: ["post_id"]
             isOneToOne: false
             referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      communities: {
+        Row: {
+          banner_url: string | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          icon_url: string | null
+          id: string
+          is_global: boolean | null
+          member_count: number | null
+          name: string
+          post_count: number | null
+          school_id: string | null
+          slug: string
+          updated_at: string | null
+        }
+        Insert: {
+          banner_url?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          icon_url?: string | null
+          id?: string
+          is_global?: boolean | null
+          member_count?: number | null
+          name: string
+          post_count?: number | null
+          school_id?: string | null
+          slug: string
+          updated_at?: string | null
+        }
+        Update: {
+          banner_url?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          icon_url?: string | null
+          id?: string
+          is_global?: boolean | null
+          member_count?: number | null
+          name?: string
+          post_count?: number | null
+          school_id?: string | null
+          slug?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "communities_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "communities_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_members: {
+        Row: {
+          community_id: string | null
+          id: string
+          joined_at: string | null
+          profile_id: string | null
+          role: string | null
+        }
+        Insert: {
+          community_id?: string | null
+          id?: string
+          joined_at?: string | null
+          profile_id?: string | null
+          role?: string | null
+        }
+        Update: {
+          community_id?: string | null
+          id?: string
+          joined_at?: string | null
+          profile_id?: string | null
+          role?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_members_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "community_members_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      elections: {
+        Row: {
+          created_at: string | null
+          election_type: string | null
+          end_date: string
+          group_id: string | null
+          id: string
+          start_date: string
+          status: string | null
+          winner_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          election_type?: string | null
+          end_date: string
+          group_id?: string | null
+          id?: string
+          start_date: string
+          status?: string | null
+          winner_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          election_type?: string | null
+          end_date?: string
+          group_id?: string | null
+          id?: string
+          start_date?: string
+          status?: string | null
+          winner_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "elections_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "elections_winner_id_fkey"
+            columns: ["winner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      friend_requests: {
+        Row: {
+          created_at: string | null
+          id: string
+          receiver_id: string | null
+          sender_id: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          receiver_id?: string | null
+          sender_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          receiver_id?: string | null
+          sender_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "friend_requests_receiver_id_fkey"
+            columns: ["receiver_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "friend_requests_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      friendships: {
+        Row: {
+          created_at: string | null
+          id: string
+          profile_id_1: string | null
+          profile_id_2: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          profile_id_1?: string | null
+          profile_id_2?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          profile_id_1?: string | null
+          profile_id_2?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "friendships_profile_id_1_fkey"
+            columns: ["profile_id_1"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "friendships_profile_id_2_fkey"
+            columns: ["profile_id_2"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -108,6 +355,111 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "group_chats_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      group_members: {
+        Row: {
+          contribution_score: number | null
+          group_id: string | null
+          id: string
+          joined_at: string | null
+          profile_id: string | null
+          role: string | null
+        }
+        Insert: {
+          contribution_score?: number | null
+          group_id?: string | null
+          id?: string
+          joined_at?: string | null
+          profile_id?: string | null
+          role?: string | null
+        }
+        Update: {
+          contribution_score?: number | null
+          group_id?: string | null
+          id?: string
+          joined_at?: string | null
+          profile_id?: string | null
+          role?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_members_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "group_members_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      groups: {
+        Row: {
+          class_section: string | null
+          created_at: string | null
+          description: string | null
+          grade_level: string | null
+          id: string
+          is_private: boolean | null
+          leader_id: string | null
+          member_count: number | null
+          name: string
+          school_id: string | null
+          subject_code: string | null
+          type: string
+          updated_at: string | null
+        }
+        Insert: {
+          class_section?: string | null
+          created_at?: string | null
+          description?: string | null
+          grade_level?: string | null
+          id?: string
+          is_private?: boolean | null
+          leader_id?: string | null
+          member_count?: number | null
+          name: string
+          school_id?: string | null
+          subject_code?: string | null
+          type: string
+          updated_at?: string | null
+        }
+        Update: {
+          class_section?: string | null
+          created_at?: string | null
+          description?: string | null
+          grade_level?: string | null
+          id?: string
+          is_private?: boolean | null
+          leader_id?: string | null
+          member_count?: number | null
+          name?: string
+          school_id?: string | null
+          subject_code?: string | null
+          type?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "groups_leader_id_fkey"
+            columns: ["leader_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "groups_school_id_fkey"
             columns: ["school_id"]
             isOneToOne: false
             referencedRelation: "schools"
@@ -154,6 +506,47 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          body: string | null
+          created_at: string | null
+          id: string
+          is_read: boolean | null
+          link_url: string | null
+          profile_id: string | null
+          title: string
+          type: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          link_url?: string | null
+          profile_id?: string | null
+          title: string
+          type: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          link_url?: string | null
+          profile_id?: string | null
+          title?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       post_votes: {
         Row: {
           created_at: string
@@ -189,30 +582,63 @@ export type Database = {
       posts: {
         Row: {
           author_id: string
+          comment_count: number | null
+          community_id: string | null
           content: string
+          content_type: string | null
           created_at: string
+          downvotes: number | null
+          group_id: string | null
+          hot_score: number | null
           id: string
           image_urls: string[] | null
+          is_anonymous: boolean | null
+          is_pinned: boolean | null
           school_id: string | null
+          title: string | null
           updated_at: string
+          upvotes: number | null
+          view_count: number | null
         }
         Insert: {
           author_id: string
+          comment_count?: number | null
+          community_id?: string | null
           content: string
+          content_type?: string | null
           created_at?: string
+          downvotes?: number | null
+          group_id?: string | null
+          hot_score?: number | null
           id?: string
           image_urls?: string[] | null
+          is_anonymous?: boolean | null
+          is_pinned?: boolean | null
           school_id?: string | null
+          title?: string | null
           updated_at?: string
+          upvotes?: number | null
+          view_count?: number | null
         }
         Update: {
           author_id?: string
+          comment_count?: number | null
+          community_id?: string | null
           content?: string
+          content_type?: string | null
           created_at?: string
+          downvotes?: number | null
+          group_id?: string | null
+          hot_score?: number | null
           id?: string
           image_urls?: string[] | null
+          is_anonymous?: boolean | null
+          is_pinned?: boolean | null
           school_id?: string | null
+          title?: string | null
           updated_at?: string
+          upvotes?: number | null
+          view_count?: number | null
         }
         Relationships: [
           {
@@ -220,6 +646,20 @@ export type Database = {
             columns: ["author_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "posts_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "posts_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
             referencedColumns: ["id"]
           },
           {
@@ -234,33 +674,54 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          bio: string | null
+          class_section: string | null
           created_at: string
+          display_name: string | null
           grade_level: string | null
           id: string
+          is_anonymous_mode: boolean | null
+          last_active_at: string | null
+          preferred_language: string | null
           reputation_points: number | null
           school_id: string | null
+          total_contributions: number | null
           updated_at: string
           user_id: string
           username: string | null
         }
         Insert: {
           avatar_url?: string | null
+          bio?: string | null
+          class_section?: string | null
           created_at?: string
+          display_name?: string | null
           grade_level?: string | null
           id?: string
+          is_anonymous_mode?: boolean | null
+          last_active_at?: string | null
+          preferred_language?: string | null
           reputation_points?: number | null
           school_id?: string | null
+          total_contributions?: number | null
           updated_at?: string
           user_id: string
           username?: string | null
         }
         Update: {
           avatar_url?: string | null
+          bio?: string | null
+          class_section?: string | null
           created_at?: string
+          display_name?: string | null
           grade_level?: string | null
           id?: string
+          is_anonymous_mode?: boolean | null
+          last_active_at?: string | null
+          preferred_language?: string | null
           reputation_points?: number | null
           school_id?: string | null
+          total_contributions?: number | null
           updated_at?: string
           user_id?: string
           username?: string | null
@@ -386,24 +847,36 @@ export type Database = {
           domain: string | null
           id: string
           location: string | null
+          location_city: string | null
+          location_country: string | null
+          location_state: string | null
+          metadata: Json | null
           name: string
-          verified_status: boolean | null
+          verified_status: string | null
         }
         Insert: {
           created_at?: string
           domain?: string | null
           id?: string
           location?: string | null
+          location_city?: string | null
+          location_country?: string | null
+          location_state?: string | null
+          metadata?: Json | null
           name: string
-          verified_status?: boolean | null
+          verified_status?: string | null
         }
         Update: {
           created_at?: string
           domain?: string | null
           id?: string
           location?: string | null
+          location_city?: string | null
+          location_country?: string | null
+          location_state?: string | null
+          metadata?: Json | null
           name?: string
-          verified_status?: boolean | null
+          verified_status?: string | null
         }
         Relationships: []
       }
@@ -435,6 +908,35 @@ export type Database = {
             columns: ["school_id"]
             isOneToOne: false
             referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_interests: {
+        Row: {
+          created_at: string | null
+          id: string
+          interest_tag: string
+          profile_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          interest_tag: string
+          profile_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          interest_tag?: string
+          profile_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_interests_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
